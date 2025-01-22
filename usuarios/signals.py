@@ -11,8 +11,7 @@ def create_superuser_if_not_exists(sender, **kwargs):
     if settings.configured and settings.DEBUG:
         if not User.objects.filter(is_superuser=True).exists():
             User.objects.create_superuser(
-                username="aluon",
-                email="aluon.aluoni@gmail.com",
-                password="123456"
+                username="admin",
+                password="admin123"
             )
             print("Superusuário criado com sucesso.")

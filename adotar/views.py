@@ -10,7 +10,7 @@ def listar_pets(request):
         
         cidade = request.GET.get('cidade')
         raca_filter = request.GET.get('raca')
-        print(cidade, raca_filter, sep='   ')
+        
         if cidade:
             pets = pets.filter(cidade__icontains=cidade)
             
