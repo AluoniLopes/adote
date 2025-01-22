@@ -38,7 +38,7 @@
                             <form action="{% url 'listar_pets' %}" method="GET">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <input type="text" placeholder="Cidade..." value="{% if cidade %}{{ cidade }}{% endif %}" name="cidade" class="form-control">
+                                        <input type="text" placeholder="Cidade..." value="{# {% if cidade %}{{ cidade }}{% endif %} #}" name="cidade" class="form-control">
                                     </div>
 
                                     <div class="col-md-4">
@@ -66,7 +66,11 @@
                                 {% for pet in pets%}
                                     <tr class="tabela-linha">
                                         <td width="20%">
+                                            {% if pet.foto %}
                                             <a href=""><img width="40%" src="{{pet.foto.url}}"></a>
+                                            {% else %}
+                                            no image
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {{pet.nome}}
