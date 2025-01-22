@@ -38,8 +38,7 @@ def cadastro(request: HttpRequest):
             messages.add_message(request, constants.ERROR, "Não foi possivel registrar sua conta, tente novamente")
             return render(request, "cadastro.html")
 
-
-def logar(request):
+def logar(request: HttpRequest):
     if request.user.is_authenticated:
         return redirect('/divulgar/seus_pets/')
     if request.method == "GET":
@@ -57,6 +56,7 @@ def logar(request):
             return render(request, 'login.html')
 
 
-def sair(request): 
+def sair(request: HttpRequest): 
     logout(request)
+    messages.add_message(request, constants.SUCCESS, "Desconectado com sucesso!")
     return redirect('/auth/login')
