@@ -2,50 +2,40 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import constants
 from django.shortcuts import redirect, render
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import reverse
 from .models import *
+from . import forms
 
+REDIRECT_VAR = 'next'
 
-# Create your views here.
 @login_required
-def novo_pet(request: HttpRequest):
-    if request.method == "GET":
-        tags = Tag.objects.all()
-        racas = Raca.objects.all()
-        return render(request, 'novo_pet.html', {'tags': tags,
-                                                 'racas': racas
-                                                 })
-    elif request.method == 'POST':
-        foto = request.FILES.get('foto')
-        nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao')
-        estado = request.POST.get('estado')
-        cidade = request.POST.get('cidade')
-        telefone = request.POST.get('telefone')
-        tags = request.POST.getlist('tags')
-        raca = request.POST.get('raca')
+def novo_pet(request: HttpRequest) -> HttpResponseRedirect:
+    TEMPLATE_NAME = 'novo_pet.html'
+    
+    ctx = dict(
+        tags = Tag.objects.all(),
+        racas = Raca.objects.all(),
+        form = forms.PetForm()
+        )
+    
+    if request.method == "POST":
+        form = forms.PetForm(request.POST, request.FILES)
 
-        pet = Pet(
-            usuario=request.user,
-            foto=foto,
-            nome=nome,
-            descricao=descricao,
-            estado=estado,
-            cidade=cidade,
-            telefone=telefone,
-            raca_id=raca,
-                  )
-        pet.save()
-        pet.tags.add(*tags)
+        if form.is_valid():
+            pet = form.save(commit=False)
+            pet.save_m2m()
+            pet.save()
+            messages.add_message(request, constants.SUCCESS, "o Pet %s foi cadastrado sucesso!" % pet.nome)
+        else:
+            errors = form.errors
+            messages.error(request, errors.as_ul())
+            return render(request, TEMPLATE_NAME, ctx.update({'form': form}))
+            # return redirect('novo_pet')
+        return HttpResponseRedirect(request.GET.get(REDIRECT_VAR, reverse('seus_pets')))
+    elif request.method == 'GET':
+        return render(request, TEMPLATE_NAME, ctx)
 
-        tags = Tag.objects.all()
-        racas = Raca.objects.all()
-        messages.add_message(request, constants.SUCCESS, 
-                             'Novo pet cadastrado'
-                             )
-        return render(request, 'novo_pet.html', {'tags': tags,
-                                                 'racas': racas
-                                                 })
 
 
 @login_required
